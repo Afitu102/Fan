@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Premium Fan Card Builder</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.6/dist/JsBarcode.all.min.js"></script>
+
+<style>
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+font-family:Arial,sans-serif;
+}
+
+body{
+background:#080e20;
+color:white;
+padding:12px;
+}
+
+.container{
+max-width:850px;
+margin:auto;
+}
+
+h1{
+text-align:center;
+color:#e6c66b;
+font-size:23px;
+margin:15px 0 6px;
+}
+
+.subtitle{
+text-align:center;
+color:#aaa;
+font-size:12px;
+margin-bottom:20px;
+}
+
+.section-title{
+background:#19294e;
+color:#e6c66b;
+padding:12px;
+border-radius:8px;
+font-size:13px;
+font-weight:bold;
+margin:16px 0 10px;
+}
+
+.form{
+background:#111c38;
+border:1px solid #26385e;
+border-radius:10px;
+padding:13px;
+margin:15px 0;
+}
+
+label{
+display:block;
+font-size:12px;
+margin:12px 0 5px;
+font-weight:bold;
+color:#ddd;
+}
+
+input,select,textarea{
+width:100%;
+padding:11px;
+border:1px solid #34446b;
+background:#081329;
+color:white;
+border-radius:7px;
+outline:none;
+}
+
+textarea{
+min-height:75px;
+resize:vertical;
+}
+
+.row{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+}
+
+/* CELEBRITY SELECTION */
+
+.search{
+margin-bottom:10px;
+}
+
+.filters{
+display:flex;
+gap:7px;
+overflow-x:auto;
+margin-bottom:12px;
+}
+
+.filters button{
+width:auto;
+min-width:max-content;
+padding:9px 14px;
+background:#19294e;
+border:1px solid #34446b;
+color:white;
+border-radius:20px;
+cursor:pointer;
+}
+
+.filters button.active{
+background:#d4af37;
+color:#111;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:9px;
+}
+
+.celeb{
+background:#111c38;
+border:2px solid #293b62;
+padding:9px 5px;
+text-align:center;
+border-radius:9px;
+cursor:pointer;
+}
+
+.celeb.active{
+border-color:#d4af37;
+background:#25375b;
+}
+
+.celeb img{
+width:55px;
+height:55px;
+border-radius:50%;
+object-fit:cover;
+display:block;
+margin:0 auto 6px;
+}
+
+.celeb b{
+font-size:10px;
+display:block;
+}
+
+.celeb small{
+color:#aaa;
+font-size:9px;
+}
+
+/* COLOUR THEMES */
+
+.theme-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:9px;
+}
+
+.theme-option{
+background:#101a32;
+border:2px solid #34446b;
+padding:9px 5px;
+text-align:center;
+border-radius:8px;
+cursor:pointer;
+}
+
+.theme-option.active{
+border-color:#e6c66b;
+}
+
+.theme-color{
+height:28px;
+border-radius:5px;
+margin-bottom:6px;
+}
+
+.theme-option small{
+font-size:10px;
+}
+
+.custom-color{
+display:flex;
+align-items:center;
+gap:12px;
+margin-top:12px;
+}
+
+.custom-color input{
+width:65px;
+height:43px;
+padding:3px;
+}
+
+/* CARD PREVIEW */
+
+.card-wrap{
+background:#111c38;
+padding:12px;
+border-radius:12px;
+margin-top:20px;
+}
+
+/* STANDARD BANK CARD PROPORTIONS */
+
+.card{
+width:100%;
+max-width:540px;
+aspect-ratio:85.60 / 53.98;
+height:auto;
+margin:0 auto 20px;
+overflow:hidden;
+border-radius:10px;
+position:relative;
+container-type:inline-size;
+box-shadow:0 5px 18px rgba(0,0,0,.3);
+}
+
+/* FRONT CARD */
+
+.front-card{
+background:white;
+color:#111;
+display:flex;
+flex-direction:column;
+}
+
+.card-header{
+height:18%;
+flex-shrink:0;
+background:var(--main);
+color:white;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:3px;
+}
+
+.header-name{
+font-size:3.5cqw;
+font-weight:900;
+letter-spacing:.4px;
+}
+
+.header-subtitle{
+font-size:1.65cqw;
+letter-spacing:2px;
+color:var(--accent);
+margin-top:3px;
+font-weight:bold;
+}
+
+/* MAIN CONTENT */
+
+.front-main{
+height:49%;
+display:grid;
+grid-template-columns:29% minmax(0,1fr) 20%;
+gap:2%;
+padding:2% 2.5%;
+align-items:center;
+flex-shrink:0;
+min-height:0;
+overflow:hidden;
+}
+
+.fan-photo{
+width:100%;
+height:100%;
+overflow:hidden;
+border:2px solid var(--main);
+border-radius:8px;
+background:#eee;
+min-width:0;
+min-height:0;
+}
+
+.fan-photo img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+}
+
+.details{
+min-width:0;
+align-self:center;
+}
+
+.details p{
+font-size:1.8cqw;
+margin:3.5% 0;
+line-height:1.25;
+overflow-wrap:anywhere;
+}
+
+.details b{
+color:var(--main);
+}
+
+.celeb-photo{
+height:100%;
+width:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+min-width:0;
+min-height:0;
+overflow:hidden;
+}
+
+.celeb-photo img{
+width:100%;
+height:80%;
+object-fit:cover;
+border:2px solid var(--accent);
+border-radius:8px;
+background:#eee;
+}
+
+.celeb-photo small{
+color:var(--main);
+font-size:1.7cqw;
+font-weight:bold;
+margin-top:3px;
+text-align:center;
+}
+
+/* BOTTOM SECTION */
+
+.card-bottom{
+height:25%;
+display:grid;
+grid-template-columns:30% minmax(0,1fr) 13%;
+gap:2%;
+align-items:center;
+padding:1.5% 2.5%;
+flex-shrink:0;
+overflow:hidden;
+}
+
+.sig-box{
+min-width:0;
+}
+
+.sig-label{
+font-size:1.8cqw;
+margin-bottom:3px;
+}
+
+.sig{
+font-family:cursive;
+font-size:3cqw;
+text-align:center;
+border-bottom:1px solid #111;
+padding:3px;
+white-space:nowrap;
+overflow:hidden;
+}
+
+.barcode-box{
+text-align:center;
+min-width:0;
+overflow:hidden;
+}
+
+.barcode-box svg{
+width:100%;
+height:27px;
+display:block;
+}
+
+.barcode-num{
+font-size:1.4cqw;
+white-space:nowrap;
+margin-top:3px;
+}
+
+.qr-box{
+width:100%;
+min-width:0;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+}
+
+.qr-box img{
+width:100%;
+max-width:36px;
+height:auto;
+aspect-ratio:1;
+object-fit:contain;
+display:block;
+}
+
+.qr-box small{
+font-size:1.3cqw;
+white-space:nowrap;
+}
+
+/* EDITABLE DISCLAIMER */
+
+.front-disclaimer{
+height:8%;
+flex-shrink:0;
+background:var(--accent);
+color:#111;
+display:flex;
+justify-content:center;
+align-items:center;
+text-align:center;
+padding:2px 5px;
+font-size:1.8cqw;
+font-weight:900;
+overflow:hidden;
+overflow-wrap:anywhere;
+}
+
+/* BACK CARD */
+
+.back-card{
+background:var(--main);
+color:white;
+display:flex;
+flex-direction:column;
+}
+
+.mag-strip{
+height:8%;
+flex-shrink:0;
+background:#111;
+margin-top:2%;
+}
+
+.back-content{
+height:auto;
+flex:1;
+min-height:0;
+display:flex;
+flex-direction:column;
+padding:2.5% 4%;
+overflow:hidden;
+}
+
+.back-content h3{
+color:var(--accent);
+font-size:2.8cqw;
+margin-bottom:1.5%;
+}
+
+.back-content ul{
+padding-left:5%;
+margin-bottom:2%;
+}
+
+.back-content li{
+font-size:1.8cqw;
+line-height:1.35;
+overflow-wrap:anywhere;
+}
+
+.back-content p{
+font-size:1.8cqw;
+line-height:1.3;
+margin-bottom:2%;
+overflow-wrap:anywhere;
+}
+
+.back-qr{
+background:white;
+color:#111;
+display:flex;
+align-items:center;
+gap:2%;
+border-radius:7px;
+padding:1.5%;
+margin-top:auto;
+flex-shrink:0;
+overflow:hidden;
+}
+
+.back-qr img{
+width:11%;
+max-width:38px;
+height:auto;
+aspect-ratio:1;
+object-fit:contain;
+}
+
+.back-qr b{
+font-size:2.3cqw;
+}
+
+.back-qr small{
+font-size:1.5cqw;
+}
+
+.back-disclaimer{
+color:var(--accent);
+font-size:1.7cqw;
+font-weight:bold;
+text-align:center;
+padding-top:1.5%;
+flex-shrink:0;
+overflow-wrap:anywhere;
+}
+
+/* BUTTONS */
+
+button.action{
+width:100%;
+padding:14px;
+border:0;
+border-radius:8px;
+background:#d4af37;
+color:#111;
+font-weight:bold;
+font-size:14px;
+cursor:pointer;
+margin-top:10px;
+}
+
+button.secondary{
+background:#26385e;
+color:white;
+}
+
+button:disabled{
+opacity:.5;
+}
+
+.notice{
+text-align:center;
+color:#999;
+font-size:10px;
+line-height:1.5;
+margin:15px 0;
+}
+
+/* MOBILE */
+
+@media(max-width:450px){
+
+.grid{
+grid-template-columns:repeat(3,1fr);
+}
+
+.celeb img{
+width:48px;
+height:48px;
+}
+
+.card-wrap{
+padding:8px;
+}
+
+.section-title{
+font-size:12px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>FAN MEMBERSHIP CARD BUILDER</h1>
+
+<p class="subtitle">
+Create your personalized celebrity fan collectible card.
+</p>
+
+<div class="section-title">SELECT CELEBRITY</div>
+
+<input class="search" id="search"
+placeholder="Search celebrity..."
+oninput="renderCelebs()">
+
+<div class="filters">
+<button class="active" onclick="setCategory('All',this)">All</button>
+<button onclick="setCategory('American',this)">American</button>
+<button onclick="setCategory('British',this)">British</button>
+<button onclick="setCategory('International',this)">International</button>
+</div>
+
+<div class="grid" id="celebGrid"></div>
+
+
+<!-- COLOUR SELECTION -->
+
+<div class="form">
+
+<div class="section-title">CHOOSE CARD COLOUR</div>
+
+<div class="theme-grid">
+
+<div class="theme-option active"
+onclick="setTheme('#172e59','#d4af37',this)">
+<div class="theme-color" style="background:#172e59"></div>
+<small>Navy Gold</small>
+</div>
+
+<div class="theme-option"
+onclick="setTheme('#111111','#d4af37',this)">
+<div class="theme-color" style="background:#111"></div>
+<small>Black Gold</small>
+</div>
+
+<div class="theme-option"
+onclick="setTheme('#541b70','#e6b8ff',this)">
+<div class="theme-color" style="background:#541b70"></div>
+<small>Purple</small>
+</div>
+
+<div class="theme-option"
+onclick="setTheme('#075c3c','#d4af37',this)">
+<div class="theme-color" style="background:#075c3c"></div>
+<small>Emerald</small>
+</div>
+
+<div class="theme-option"
+onclick="setTheme('#791e2b','#f1c40f',this)">
+<div class="theme-color" style="background:#791e2b"></div>
+<small>Burgundy</small>
+</div>
+
+<div class="theme-option"
+onclick="setTheme('#164e82','#c0e6ff',this)">
+<div class="theme-color" style="background:#164e82"></div>
+<small>Blue</small>
+</div>
+
+<div class="theme-option"
+onclick="setTheme('#704214','#f5d6a0',this)">
+<div class="theme-color" style="background:#704214"></div>
+<small>Chocolate</small>
+</div>
+
+<div class="theme-option"
+onclick="setTheme('#777777','#ffffff',this)">
+<div class="theme-color" style="background:#777"></div>
+<small>Silver</small>
+</div>
+
+<div class="theme-option"
+onclick="setTheme('#a32663','#ffd1e8',this)">
+<div class="theme-color" style="background:#a32663"></div>
+<small>Rose Pink</small>
+</div>
+
+</div>
+
+<label>Custom Colour</label>
+
+<div class="custom-color">
+<input type="color" id="customColor"
+value="#172e59"
+oninput="setCustomTheme(this.value)">
+<span style="font-size:11px;color:#bbb">
+Choose your own card colour.
+</span>
+</div>
+
+</div>
+
+
+<!-- EDIT FRONT AND BACK -->
+
+<div class="form">
+
+<div class="section-title">EDIT FRONT CARD</div>
+
+<label>Fan Name</label>
+<input id="fanName" value="Sarah James" oninput="update()">
+
+<div class="row">
+
+<div>
+<label>Sex</label>
+<select id="sex" onchange="update()">
+<option>Female</option>
+<option>Male</option>
+<option>Other</option>
+</select>
+</div>
+
+<div>
+<label>Card Type</label>
+<select id="cardType" onchange="update()">
+<option>Regular</option>
+<option>VIP</option>
+</select>
+</div>
+
+</div>
+
+<label>Country</label>
+<input id="country" value="USA" oninput="update()">
+
+<label>Favorite</label>
+<input id="fav" value="Favorite Celebrity" oninput="update()">
+
+<label>Upload Fan Photograph</label>
+<input type="file" accept="image/*" onchange="loadPhoto(event)">
+
+<button class="action secondary" onclick="generateID()">
+GENERATE NEW FAN ID
+</button>
+
+
+<div class="section-title">EDIT BACK CARD</div>
+
+<label>Membership Benefits (one per line)</label>
+
+<textarea id="backBenefits" oninput="update()">Early access to exclusive content
+VIP members receive priority access
+Special fan community privileges
+Exclusive membership updates</textarea>
+
+<label>Terms and Conditions</label>
+
+<textarea id="backTerms" oninput="update()">This is an unofficial fan-made collectible. It does not grant access to any celebrity's private events or official membership programs.</textarea>
+
+<label>Validity</label>
+
+<input id="backValid"
+value="Member Since 2026 - Active"
+oninput="update()">
+
+<label>Contact / Team Note</label>
+
+<input id="backContact"
+value="Contact the fan community for information"
+oninput="update()">
+
+<div class="section-title">EDIT FAN CARD DISCLAIMER</div>
+
+<label>Disclaimer Text (appears on BOTH sides)</label>
+
+<textarea id="disclaimer" oninput="update()">UNOFFICIAL FAN-MADE COLLECTIBLE</textarea>
+
+</div>
+
+
+<!-- CARD PREVIEWS -->
+
+<div class="card-wrap">
+
+<div class="section-title">FRONT CARD PREVIEW</div>
+
+<div class="card front-card" id="frontCard">
+
+<div class="card-header">
+
+<div class="header-name" id="headerName">
+Celebrity Membership Card
+</div>
+
+<div class="header-subtitle">
+PREMIUM FAN COLLECTIBLE
+</div>
+
+</div>
+
+<div class="front-main">
+
+<div class="fan-photo">
+<img id="fanPhoto"
+src="https://i.pravatar.cc/400?img=47"
+alt="Fan photograph">
+</div>
+
+<div class="details">
+
+<p><b>FAN NAME:</b> <span id="pName"></span></p>
+<p><b>FAN ID:</b> <span id="pId"></span></p>
+<p><b>SEX:</b> <span id="pSex"></span></p>
+<p><b>CARD TYPE:</b> <span id="pType"></span></p>
+<p><b>COUNTRY:</b> <span id="pCountry"></span></p>
+<p><b>MEMBER SINCE:</b> <span id="pYear"></span></p>
+<p><b>FAVORITE:</b> <span id="pFav"></span></p>
+
+</div>
+
+<div class="celeb-photo">
+<img id="celebLargePhoto"
+src="https://ui-avatars.com/api/?name=Celebrity"
+alt="Selected celebrity">
+
+<small id="celebPhotoName">Celebrity</small>
+</div>
+
+</div>
+
+<div class="card-bottom">
+
+<div class="sig-box">
+<div class="sig-label">Signature</div>
+<div class="sig" id="pSig">S. James</div>
+</div>
+
+<div class="barcode-box">
+<svg id="barcode"></svg>
+<div class="barcode-num" id="barcodeNum"></div>
+</div>
+
+<div class="qr-box">
+<img id="qrImg" src="" alt="QR code">
+<small>SCAN CARD</small>
+</div>
+
+</div>
+
+<div class="front-disclaimer" id="frontDisclaimer">
+UNOFFICIAL FAN-MADE COLLECTIBLE
+</div>
+
+</div>
+
+
+<div class="section-title">BACK CARD PREVIEW</div>
+
+<div class="card back-card" id="backCard">
+
+<div class="mag-strip"></div>
+
+<div class="back-content">
+
+<h3>MEMBER BENEFITS</h3>
+
+<ul id="backBenefitsList"></ul>
+
+<p><b>TERMS:</b> <span id="backTermsText"></span></p>
+
+<p><b>VALID:</b> <span id="backValidText"></span></p>
+
+<p><b>CONTACT:</b> <span id="backContactText"></span></p>
+
+<div class="back-qr">
+
+<img id="qrBack" src="" alt="QR code">
+
+<div>
+<b>Fan Card Information</b>
+<br>
+<small>Unofficial fan-made collectible.</small>
+<br>
+<small id="backId"></small>
+</div>
+
+</div>
+
+<div class="back-disclaimer" id="backDisclaimer">
+UNOFFICIAL FAN-MADE COLLECTIBLE
+</div>
+
+</div>
+
+</div>
+
+
+<button class="action"
+onclick="downloadCard('frontCard','fan-front.png')">
+DOWNLOAD FRONT CARD
+</button>
+
+<button class="action secondary"
+onclick="downloadCard('backCard','fan-back.png')">
+DOWNLOAD BACK CARD
+</button>
+
+<p class="notice">
+This is an unofficial fan-made collectible. It is not issued,
+approved or endorsed by the celebrity or their representatives.
+Celebrity photographs are displayed for identification of the selected
+public figure and may not be available for every selection.
+</p>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* CELEBRITY DATABASE */
+
+const celebs=[
+
+{name:"Taylor Swift",category:"American"},
+{name:"Beyoncé",category:"American"},
+{name:"Ariana Grande",category:"American"},
+{name:"Selena Gomez",category:"American"},
+{name:"Jennifer Lopez",category:"American"},
+{name:"Kim Kardashian",category:"American"},
+{name:"Zendaya",category:"American"},
+{name:"Billie Eilish",category:"American"},
+{name:"Lady Gaga",category:"American"},
+{name:"Miley Cyrus",category:"American"},
+{name:"Will Smith",category:"American"},
+{name:"Leonardo DiCaprio",category:"American"},
+{name:"Tom Cruise",category:"American"},
+{name:"Denzel Washington",category:"American"},
+{name:"Robert Downey Jr.",category:"American"},
+{name:"Scarlett Johansson",category:"American"},
+{name:"Oprah Winfrey",category:"American"},
+{name:"Chris Evans",category:"American"},
+{name:"Jennifer Aniston",category:"American"},
+{name:"Keanu Reeves",category:"American"},
+{name:"Elon Musk",category:"American"},
+
+{name:"David Beckham",category:"British"},
+{name:"Victoria Beckham",category:"British"},
+{name:"Tom Holland",category:"British"},
+{name:"Emma Watson",category:"British"},
+{name:"Daniel Radcliffe",category:"British"},
+{name:"Harry Styles",category:"British"},
+{name:"Ed Sheeran",category:"British"},
+{name:"Adele",category:"British"},
+{name:"Dua Lipa",category:"British"},
+{name:"Jason Statham",category:"British"},
+{name:"Rowan Atkinson",category:"British"},
+{name:"Henry Cavill",category:"British"},
+{name:"Benedict Cumberbatch",category:"British"},
+{name:"Kate Winslet",category:"British"},
+{name:"Simon Cowell",category:"British"},
+
+{name:"Will Parfitt",category:"International"},
+{name:"Justin Bieber",category:"International"},
+{name:"Rihanna",category:"International"}
+
+];
+
+
+/* VARIABLES */
+
+let selected=0;
+let category="All";
+let fanID="";
+
+let currentTheme={
+main:"#172e59",
+accent:"#d4af37"
+};
+
+const celebrityImages={};
+
+
+/* FALLBACK IMAGE */
+
+function fallback(name){
+
+return "https://ui-avatars.com/api/?name="+
+encodeURIComponent(name)+
+"&background=172e59&color=ffffff&size=300";
+
+}
+
+
+/* CATEGORY FILTER */
+
+function setCategory(value,button){
+
+category=value;
+
+document.querySelectorAll(".filters button").forEach(b=>{
+b.classList.remove("active");
+});
+
+button.classList.add("active");
+
+renderCelebs();
+
+}
+
+
+/* CELEBRITY GRID */
+
+function renderCelebs(){
+
+const grid=document.getElementById("celebGrid");
+
+const search=document.getElementById("search").value.toLowerCase();
+
+grid.innerHTML="";
+
+celebs.forEach((c,index)=>{
+
+if(category!=="All" && c.category!==category)return;
+
+if(!c.name.toLowerCase().includes(search))return;
+
+const div=document.createElement("div");
+
+div.className="celeb"+(selected===index?" active":"");
+
+const img=document.createElement("img");
+
+img.src=celebrityImages[index]||fallback(c.name);
+
+img.alt=c.name;
+
+img.onerror=()=>{
+img.onerror=null;
+img.src=fallback(c.name);
+};
+
+const name=document.createElement("b");
+
+name.textContent=c.name;
+
+const small=document.createElement("small");
+
+small.textContent=c.category;
+
+div.append(img,name,small);
+
+div.onclick=()=>{
+
+selected=index;
+fanID="";
+
+generateID();
+
+renderCelebs();
+
+update();
+
+};
+
+grid.appendChild(div);
+
+});
+
+}
+
+
+/* LOAD CELEBRITY PHOTOGRAPHS */
+
+async function loadCelebrityImages(){
+
+for(let i=0;i<celebs.length;i++){
+
+try{
+
+const url="https://en.wikipedia.org/api/rest_v1/page/summary/"+
+encodeURIComponent(celebs[i].name.replace(/ /g,"_"));
+
+const response=await fetch(url);
+
+if(!response.ok)continue;
+
+const data=await response.json();
+
+if(data.thumbnail?.source){
+
+celebrityImages[i]=data.thumbnail.source;
+
+renderCelebs();
+
+if(selected===i){
+update();
+}
+
+}
+
+}catch(error){
+
+console.log("Could not load:",celebs[i].name);
+
+}
+
+}
+
+}
+
+
+/* THEME SELECTION */
+
+function setTheme(main,accent,element){
+
+currentTheme.main=main;
+currentTheme.accent=accent;
+
+document.querySelectorAll(".theme-option").forEach(el=>{
+el.classList.remove("active");
+});
+
+if(element)element.classList.add("active");
+
+document.getElementById("customColor").value=main;
+
+update();
+
+}
+
+
+function setCustomTheme(color){
+
+currentTheme.main=color;
+currentTheme.accent="#d4af37";
+
+document.querySelectorAll(".theme-option").forEach(el=>{
+el.classList.remove("active");
+});
+
+update();
+
+}
+
+
+/* GENERATE FAN ID */
+
+function generateID(){
+
+const prefix=celebs[selected].name
+.replace(/[^a-zA-Z]/g,"")
+.substring(0,3).toUpperCase();
+
+fanID=prefix+"-"+new Date().getFullYear()+"-"+
+Math.floor(100000+Math.random()*900000);
+
+update();
+
+}
+
+
+/* UPDATE CARD */
+
+function update(){
+
+const c=celebs[selected];
+
+const name=document.getElementById("fanName").value.trim()||"FAN NAME";
+
+const type=document.getElementById("cardType").value;
+
+const disclaimer=document.getElementById("disclaimer").value;
+
+const year=new Date().getFullYear();
+
+
+/* THEMES */
+
+document.getElementById("frontCard").style.setProperty("--main",currentTheme.main);
+
+document.getElementById("frontCard").style.setProperty("--accent",currentTheme.accent);
+
+document.getElementById("backCard").style.setProperty("--main",currentTheme.main);
+
+document.getElementById("backCard").style.setProperty("--accent",currentTheme.accent);
+
+
+/* HEADER */
+
+document.getElementById("headerName").textContent=
+c.name+" Membership Card";
+
+
+/* CELEBRITY PHOTO */
+
+document.getElementById("celebLargePhoto").src=
+celebrityImages[selected]||fallback(c.name);
+
+document.getElementById("celebPhotoName").textContent=c.name;
+
+/* FAN INFORMATION */
+
+document.getElementById("pName").textContent=name.toUpperCase();
+
+document.getElementById("pSex").textContent=
+document.getElementById("sex").value;
+
+document.getElementById("pType").textContent=type;
+
+document.getElementById("pCountry").textContent=
+document.getElementById("country").value;
+
+document.getElementById("pYear").textContent=year;
+
+document.getElementById("pFav").textContent=
+document.getElementById("fav").value;
+
+
+/* SIGNATURE */
+
+const parts=name.split(" ");
+
+document.getElementById("pSig").textContent=
+parts[0].charAt(0)+". "+(parts.slice(1).join(" ")||"");
+
+
+/* FAN ID */
+
+document.getElementById("pId").textContent=fanID;
+
+document.getElementById("barcodeNum").textContent=fanID;
+
+document.getElementById("backId").textContent=fanID;
+
+
+/* BARCODE */
+
+try{
+
+JsBarcode("#barcode",fanID,{
+format:"CODE128",
+displayValue:false,
+height:35,
+margin:0,
+width:1.5
+});
+
+}catch(error){}
+
+
+/* QR CODE */
+
+const qrData=JSON.stringify({
+type:"Unofficial fan-made collectible",
+celebrity:c.name,
+fan:name,
+fanID:fanID,
+cardType:type
+});
+
+const qr="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data="+
+encodeURIComponent(qrData);
+
+document.getElementById("qrImg").src=qr;
+
+document.getElementById("qrBack").src=qr;
+
+
+/* BENEFITS */
+
+const benefits=document.getElementById("backBenefits").value
+.split("\n")
+.filter(x=>x.trim());
+
+const list=document.getElementById("backBenefitsList");
+
+list.innerHTML="";
+
+benefits.forEach(b=>{
+
+const li=document.createElement("li");
+
+li.textContent=b;
+
+list.appendChild(li);
+
+});
+
+
+/* BACK INFORMATION */
+
+document.getElementById("backTermsText").textContent=
+document.getElementById("backTerms").value;
+
+document.getElementById("backValidText").textContent=
+document.getElementById("backValid").value;
+
+document.getElementById("backContactText").textContent=
+document.getElementById("backContact").value;
+
+
+/* DISCLAIMER ON BOTH SIDES */
+
+document.getElementById("frontDisclaimer").textContent=disclaimer;
+
+document.getElementById("backDisclaimer").textContent=disclaimer;
+
+
+/* ADAPT BACK TEXT TO AVAILABLE SPACE */
+
+fitBackContent();
+
+}
+
+
+/* AUTOMATIC BACK-CARD TEXT FITTING */
+
+function fitBackContent(){
+
+const content=document.querySelector(".back-content");
+
+let fontSize=1.8;
+
+content.querySelectorAll("li,p").forEach(el=>{
+el.style.fontSize=fontSize+"cqw";
+});
+
+let attempts=0;
+
+while(content.scrollHeight>content.clientHeight && fontSize>1.1 && attempts<15){
+
+fontSize-=0.1;
+
+content.querySelectorAll("li,p").forEach(el=>{
+el.style.fontSize=fontSize+"cqw";
+});
+
+attempts++;
+
+}
+
+}
+
+
+/* UPLOAD FAN PHOTO */
+
+function loadPhoto(event){
+
+const file=event.target.files[0];
+
+if(!file)return;
+
+if(!file.type.startsWith("image/")){
+alert("Please select an image.");
+return;
+}
+
+if(file.size>5*1024*1024){
+alert("Image must be smaller than 5MB.");
+return;
+}
+
+const reader=new FileReader();
+
+reader.onload=()=>{
+document.getElementById("fanPhoto").src=reader.result;
+};
+
+reader.readAsDataURL(file);
+
+}
+
+
+/* DOWNLOAD CARD */
+
+async function downloadCard(id,filename){
+
+const element=document.getElementById(id);
+
+const buttons=document.querySelectorAll("button.action");
+
+buttons.forEach(b=>b.disabled=true);
+
+try{
+
+await document.fonts.ready;
+
+const images=Array.from(element.querySelectorAll("img"));
+
+await Promise.all(images.map(img=>{
+
+if(img.complete)return Promise.resolve();
+
+return new Promise(resolve=>{
+
+img.onload=resolve;
+img.onerror=resolve;
+
+});
+
+}));
+
+const canvas=await html2canvas(element,{
+
+scale:4,
+useCORS:true,
+allowTaint:false,
+backgroundColor:null,
+logging:false
+
+});
+
+const link=document.createElement("a");
+
+link.download=filename;
+
+link.href=canvas.toDataURL("image/png");
+
+link.click();
+
+}catch(error){
+
+console.error(error);
+
+alert("Download failed. Please check your internet connection and try again.");
+
+}finally{
+
+buttons.forEach(b=>b.disabled=false);
+
+}
+
+}
+
+
+/* INITIALIZE */
+
+renderCelebs();
+
+generateID();
+
+loadCelebrityImages();
+
+</script>
+
+</body>
+</html>
